@@ -81,8 +81,10 @@ const server = http.createServer((req, res) => {
       }
     }
 
-    res.statusCode = 200;
-    res.setHeader("Content-Type", mimeTypes[options.type]);
+    res.writeHead(200, {
+      "Content-Type": mimeTypes[options.type],
+      "Content-Length": buf.length,
+    });
     res.end(buf);
   } catch (error) {
     res.statusCode = 404;
