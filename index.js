@@ -43,7 +43,11 @@ if (fs.existsSync("./palette.yml")) {
 
 //-- MAIN SERVER
 const server = http.createServer((req, res) => {
-  const requestUrl = url.parse(req.url, true);
+  const reqUrl = req.headers["x-mockimageserver-path"] || req.url;
+  const requestUrl = url.parse(reqUrl, true);
+
+  const date = new Date().toLocaleString("sv-SE"); //.replace(/\D/g, '');
+  console.log(`[${date}] ${req.method} ${reqUrl}  RealPath: ${req.url}`);
 
   try {
     const options = extractOptionsFromUrl(
