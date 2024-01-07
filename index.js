@@ -124,19 +124,25 @@ function createImageBuffer(
   const canvas = createCanvas(width, height, type);
   const context = canvas.getContext("2d");
 
-  const fontSize = height / 10;
+  const marginX = width * 0.05;
+
+  let fontSize = height / 20;
 
   context.fillStyle = color;
   context.fillRect(0, 0, width, height);
   context.fillStyle = textColor;
   context.font = `${fontSize}px ${textFont}`;
 
-  const textSize = context.measureText(text);
+  // Adjust font size to fit the text in the canvas
+  let textSize = context.measureText(text);
+  const scale = Math.min((width - marginX) / textSize.width, 1.0);
+  fontSize = fontSize * scale;
 
+  context.font = `${fontSize}px ${textFont}`;
   context.fillText(
     text,
-    canvas.width / 2 - textSize.width / 2,
-    canvas.height / 2 + fontSize / 2
+    width / 2 - textSize.width * scale / 2,
+    height / 2 - textSize.actualBoundingBoxDescent * scale / 2
   );
 
   const buffer = canvas.toBuffer(mimeTypes[type]);
