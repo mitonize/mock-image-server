@@ -108,7 +108,6 @@ server.listen(3000, undefined, () => {
  * @param {*} color hex color code
  * @param {*} text
  * @param {*} textColor hex color code
- * @param {*} textsize
  * @param {*} textFont
  */
 function createImageBuffer(
@@ -118,7 +117,6 @@ function createImageBuffer(
   color,
   text,
   textColor,
-  textsize = 20,
   textFont = "sans-serif"
 ) {
   const canvas = createCanvas(width, height, type);
@@ -126,22 +124,23 @@ function createImageBuffer(
 
   const marginX = width * 0.05;
 
-  let fontSize = height / 20;
+  let fontSize = height / 10;
 
   context.fillStyle = color;
   context.fillRect(0, 0, width, height);
   context.fillStyle = textColor;
-  context.font = `${fontSize}px ${textFont}`;
+  context.font = `300 ${fontSize}px ${textFont}`;
 
   // Adjust font size to fit the text in the canvas
   let textSize = context.measureText(text);
   const scale = Math.min((width - marginX) / textSize.width, 1.0);
   fontSize = fontSize * scale;
 
-  context.font = `${fontSize}px ${textFont}`;
+  context.font = `300 ${fontSize}px ${textFont}`;
+  context.textAlign = "center";
   context.fillText(
     text,
-    width / 2 - textSize.width * scale / 2,
+    width / 2,
     height / 2 - textSize.actualBoundingBoxDescent * scale / 2
   );
 
