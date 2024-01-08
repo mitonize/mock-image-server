@@ -23,7 +23,26 @@ docker run -d -p 3000:3000 mitonize/mock-image-server
 curl http://localhost:3000/300x200.jpg
 ```
 
-## Parameters
+## Request specification
+
+### Path
+
+Foundamental parameters are specified as path component. Path format is as below. 
+
+Basic one is simply only width, height and file format like 'png', 'jpg' and so on.
+The other one clearly specifies the color.
+
+ * /{width}x{height}.{extension} (e.g. /300x200.jpg )
+ * /{color hex}/{width}x{height}.{extension}  (e.g. /99241c/300x200.png )
+
+| path component | description |
+|------------------|--------------------|
+| {color hex} | Color hex code, No '#' needed. <br>It will be adopted with the highest priority regardless of the parameters of the palette and keys described later.|
+| {width}     | Image width. |
+| {height}     | Image height. |
+| {extension} | File type as 'png', 'jpg', 'svg' |
+
+### Parameters
 Each parameter is optional.
 
 | parameter | description | default value |
