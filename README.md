@@ -51,6 +51,15 @@ Each parameter is optional.
 | key            | Color decision key. Same key is as same color.   | treat text parameter value as key. |
 | palette     | Specify  color palette definition. Palette is defined in palette.yml. | "neutral" (built in palette) |
 
+### HTTP Header
+
+Above path and parameter can be specified at the request header `X-MockImageServer-Path` alternatively.
+ If this header is set, actual path and parameter are  ignored.
+
+```
+curl -H X-MockImageServer-Path:/300x200.jpg?text=BBBB&key=KEY1 http://localhost:3000/any/path/to/image.jpg
+```
+
 ### example
 
 http://localhost:3000/300x200.jpg?text=AAAA
