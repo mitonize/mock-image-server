@@ -37,9 +37,9 @@ The other one clearly specifies the color.
 
 | path component | description |
 |------------------|--------------------|
-| {color hex} | Color hex code, No '#' needed. <br>It will be adopted with the highest priority regardless of the parameters of the palette and keys described later.|
-| {width}     | Image width. |
-| {height}     | Image height. |
+| {color hex} | Color hex code, No '#' needed. <br>highest priority color regardless of `palette`, `key`.|
+| {width}     | Image width. range is 1 to 2000.|
+| {height}     | Image height. range is 1 to 2000.|
 | {extension} | File type as 'png', 'jpg', 'svg' |
 
 ### Parameters
