@@ -9,8 +9,9 @@ RUN echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM" > /log
 
 ENV NODE_ENV production
 
-WORKDIR /usr/src/app
-COPY --chown=node:node . .
+WORKDIR /app
+COPY --chown=node:node index.js palette.yml package.json package-lock.json .
+RUN mkdir -p images
 
 # .npm-deps https://github.com/Automattic/node-canvas/issues/866
 RUN apk add --no-cache --virtual .build-deps build-base \

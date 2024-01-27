@@ -4,8 +4,9 @@ const path = require("path");
 const md5 = require("md5");
 const fs = require("fs");
 const YAML = require("yaml");
+const sharp = require("sharp");
 
-const { createCanvas } = require("canvas");
+//const { createCanvas } = require("canvas");
 
 const NodeCache = require("node-cache");
 const nodeCache = new NodeCache({
@@ -20,6 +21,8 @@ const mimeTypes = {
   jpg: "image/jpeg",
   pdf: "application/pdf",
   svg: "image/svg+xml",
+  webp: "image/webp",
+  avif: "image/avif",
 };
 
 const palettes = {
@@ -42,7 +45,7 @@ if (fs.existsSync("./palette.yml")) {
 }
 
 //-- MAIN SERVER
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   const reqUrl = req.headers["x-mockimageserver-path"] || req.url;
   const requestUrl = url.parse(reqUrl, true);
 
@@ -55,6 +58,14 @@ const server = http.createServer((req, res) => {
       requestUrl.query
     );
 
+    let mode = "GENERATE_IMAGE";
+    if (options.from && /^[a-zA-Z0-9_-]+/.test(options.from)) {
+      // Specify the file dierctory name of the existing image
+      if (fs.lstatSync(`./${options.from}`).isDirectory()) {
+        mode = "EXISTING_IMAGE";
+      }
+    }
+
     // If the image is already in the cache, we will return it
     let buf = nodeCache.get(options.output);
     if (buf == undefined) {
@@ -66,15 +77,28 @@ const server = http.createServer((req, res) => {
       const color = rgbToHex(red, green, blue);
       const textColor = hicontrastColor(red, green, blue);
 
-      buf = createImageBuffer(
-        options.width,
-        options.height,
-        options.type,
-        color,
-        options.text,
-        textColor
-      );
-      console.log(`Generated: ${options.output} key = ${options.key}`);
+      if (mode == "EXISTING_IMAGE") {
+        buf = await createImageBufferFromDir(
+          options.from,
+          options.key,
+          options.width,
+          options.height,
+          options.type,
+          color
+        );
+        console.log(`Loaded: ${options.output} key = ${options.key}`);
+      } else {
+        buf = await createImageBufferText(
+//        buf = createImageBuffer(
+          options.width,
+          options.height,
+          options.type,
+          color,
+          options.text,
+          textColor
+        );
+        console.log(`Generated: ${options.output} key = ${options.key}`);
+      }
 
       try {
         nodeCache.set(options.output, buf);
@@ -100,6 +124,80 @@ server.listen(3000, undefined, () => {
   console.log("Server running at http://localhost:3000/");
 });
 
+async function createImageBufferFromDir(
+  fromDir,
+  key, 
+  width,
+  height,
+  type,
+  color,
+  withTint = false,
+) {
+  const files = fs.readdirSync(fromDir, { withFileTypes: true })
+    .filter(dirent => dirent.isFile()
+      && mimeTypes[path.extname(dirent.name).substring(1)])
+    .map(dirent => dirent.name);
+
+  if (files.length == 0) {
+    throw new Error(`No files in ${fromDir}`);
+  }
+  const { red, green, blue } = hexToRgb(color);
+  const index = key % files.length;
+
+  console.log(`Loaded: ${fromDir}/${files[index]} key = ${key}`);
+
+
+  return await sharp(fromDir + "/" + files[index])
+  .resize(width, height)
+  .toFormat(type)
+  .toBuffer()
+
+}
+
+
+async function createImageBufferText(
+  width,
+  height,
+  type,
+  color,
+  text,
+  textColor,
+  textFont = "sans-serif"
+) {
+  const { red, green, blue } = hexToRgb(color);
+  const marginX = width * 0.05;
+  let fontSize = height / 10;
+
+  console.log(`Generated: ${red} ${green} ${blue} ${text} ${textFont}`);
+
+  const textBuf = await sharp({
+    text: {
+      text: `<span weight="light" font="${fontSize}" foreground="${textColor}">${text}</span>`,
+      font: textFont,
+      rgba: true
+    }
+  })
+  .resize(width - marginX, height, {
+    fit: 'inside',
+    withoutEnlargement: true
+  })
+  .toFormat("png")
+  .toBuffer()
+
+  return await sharp({
+    create: {
+      width: width,
+      height: height,
+      channels: 4,
+      background: { r: red, g: green, b: blue, alpha: 1.0 },
+    }
+  })
+  .composite([
+    { input: textBuf, blend: 'over'}
+  ])
+  .toFormat(type)
+  .toBuffer()
+}
 /**
  *
  * @param {*} width
@@ -157,7 +255,10 @@ function createImageBuffer(
 function extractOptionsFromUrl(pathname, query) {
   const filename = path.basename(pathname).toLowerCase();
 
-  if (/^\d+x\d+\.(png|jpg|jpeg|svg)$/.test(filename) === false) {
+  const extlist = Object.keys(mimeTypes).join("|")
+  console.log(extlist)
+
+  if (RegExp(`\\d+x\\d+\\.(${extlist})$`).test(filename) === false) {
     throw new Error(`Invalid filename: ${filename}`);
   }
 
@@ -180,14 +281,16 @@ function extractOptionsFromUrl(pathname, query) {
     hexColorCode = components[0].toLowerCase();
   }
 
+  const from = query.from;
   const text = query.text || width + "x" + height;
   const key = parseInt(md5(query.key || text).slice(0, 8), 16);
   const hash = md5(text);
 
   const palette = query.palette;
 
-  const filenameWithoutSlash = `${palette}-${hexColorCode}-${hash}-${key}-${filename}`;
+  const filenameWithoutSlash = `${from}-${palette}-${hexColorCode}-${hash}-${key}-${filename}`;
   return {
+    from: from,
     width: width,
     height: height,
     color: hexColorCode,
