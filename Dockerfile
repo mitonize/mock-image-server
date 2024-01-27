@@ -19,6 +19,7 @@ RUN apk add --no-cache --virtual .build-deps build-base \
  && apk add --no-cache --virtual .npm-build-deps cairo-dev libjpeg-turbo-dev pango-dev \
  && apk add --no-cache dumb-init font-noto-cjk \
  && npm ci --omit-dev \
+ && npm install --os=linux --libc=musl sharp\
  && apk del .build-deps \
  && apk del .npm-build-deps
 
