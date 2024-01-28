@@ -1,7 +1,13 @@
 # Mock Image Server
+![Docker Image Version (latest semver)](https://img.shields.io/docker/v/mitonize/mock-image-server?style=flat-square&logo=docker&logoColor=white) ![Docker Pulls](https://img.shields.io/docker/pulls/mitonize/mock-image-server?style=flat-square&logo=docker&logoColor=white)
+
 
 Mock-image-server is a simple image generation server for building website mock-ups.
 Serve images generated with specified size, color, text.
+
+**Latest version** is 1.1.0
+
+[CHANGELOG.md](CHANGELOG.md) for detail
 
 ## Run 
 
@@ -10,7 +16,7 @@ Serve images generated with specified size, color, text.
 Just run `npm start`.
 ```
 npm start
-curl http://localhost:3000/300x200.jpg
+open http://localhost:3000/300x200.jpg
 ```
 
 ### Docker
@@ -18,9 +24,9 @@ curl http://localhost:3000/300x200.jpg
 You could also use the published docker image. see [mitonize/mock-image-server](https://hub.docker.com/r/mitonize/mock-image-server).
 
 Start the Docker container by binding port 3000.
-```
+```sh
 docker run -d -p 3000:3000 mitonize/mock-image-server
-curl http://localhost:3000/300x200.jpg
+open http://localhost:3000/300x200.jpg
 ```
 
 ## Request specification
@@ -50,13 +56,14 @@ Each parameter is optional.
 | text            | Text rendered in the image. '%0a' is for newline. | generated as "{width}x{height}" |
 | key            | Color decision key. Same key is as same color.   | treat text parameter value as key. |
 | palette     | Specify  color palette definition. Palette is defined in palette.yml. | "neutral" (built in palette) |
+| from         | Enable to respond existing images by specifying folder name.   | (none) |
 
 ### HTTP Header
 
 Above path and parameter can be specified at the request header `X-MockImageServer-Path` alternatively.
  If this header is set, actual path and parameter are  ignored.
 
-```
+```sh
 curl -H X-MockImageServer-Path:/300x200.jpg?text=BBBB&key=KEY1 http://localhost:3000/any/path/to/image.jpg
 ```
 
@@ -65,7 +72,7 @@ curl -H X-MockImageServer-Path:/300x200.jpg?text=BBBB&key=KEY1 http://localhost:
 http://localhost:3000/300x200.jpg?text=AAAA
 
 These two images are same color since each key is as same. Color is determined automatically from current color palette.
-```
+```sh
 http://localhost:3000/300x200.jpg?text=AAAA&key=KEY1
 http://localhost:3000/300x200.jpg?text=BBBB&key=KEY1
 ```
@@ -74,9 +81,29 @@ To specify color palette, use `palette` parameter.
 These two images below are **different** color in spite of the same key since palette is not as same.
 
 The palette are defined in YAML file. see **palette.yml**
-```
+```sh
 http://localhost:3000/300x200.jpg?text=AAAA&key=KEY1&palette=pink
 http://localhost:3000/300x200.jpg?text=BBBB&key=KEY1&palette=blue
 ```
 
 
+```sh
+docker run -d -p 3000:3000 -v ./LOCAL-IMAGE-DIR:/app/img mitonize/mock-image-server
+
+# Enable to respond existing images by specifying folder name as 'from' parameter 
+open http://localhost:3000/300x360.jpg?from=img
+
+# Also subfolder could be use
+open http://localhost:3000/300x360.jpg?from=img/item
+```
+
+## Customizing
+
+You can override palette definition by mounting `/app/palette.yml` as docker volume.
+
+```sh
+docker run -d -p 3000:3000 \
+  -v ./LOCAL-IMAGE-DIR:/app/img \
+  -v ./MY-PALETTE.yml:/app/palette.yml \
+  mitonize/mock-image-server
+```
