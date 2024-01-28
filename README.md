@@ -46,7 +46,7 @@ The other one clearly specifies the color.
 | {color hex} | Color hex code, No '#' needed. <br>highest priority color regardless of `palette`, `key`.|
 | {width}     | Image width. range is 1 to 2000.|
 | {height}     | Image height. range is 1 to 2000.|
-| {extension} | File type as 'png', 'jpg', 'svg' |
+| {extension} | File type as 'png', 'jpg', 'webp', 'avif' |
 
 ### Parameters
 Each parameter is optional.

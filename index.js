@@ -20,7 +20,6 @@ const mimeTypes = {
   png: "image/png",
   jpg: "image/jpeg",
   pdf: "application/pdf",
-  svg: "image/svg+xml",
   webp: "image/webp",
   avif: "image/avif",
 };
@@ -202,7 +201,7 @@ async function createImageBufferText(
  *
  * @param {*} width
  * @param {*} height
- * @param {*} type png | jpg | svg
+ * @param {*} type png | jpg | webp | avif
  * @param {*} color hex color code
  * @param {*} text
  * @param {*} textColor hex color code
@@ -247,7 +246,7 @@ function createImageBuffer(
 }
 
 /**
- * /{color}/{width}x{height}.(png|jpg|jpeg|svg)
+ * /{color}/{width}x{height}.(png|jpg|webp|avif)
  * @param {*} pathname
  * @param {*} query
  * @returns
