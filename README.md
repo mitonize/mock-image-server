@@ -5,7 +5,7 @@
 Mock-image-server is a simple image generation server for building website mock-ups.
 Serve images generated with specified size, color, text.
 
-**Latest version** is 1.1.0
+**Latest version** is 1.1.1
 
 [CHANGELOG.md](CHANGELOG.md) for detail
 

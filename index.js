@@ -164,8 +164,8 @@ async function createImageBufferText(
   textFont = "sans-serif"
 ) {
   const { red, green, blue } = hexToRgb(color);
-  const marginX = width * 0.05;
-  let fontSize = height / 10;
+  const marginX =Math.floor(width * 0.05);
+  let fontSize = Math.ceil(height / 10);
 
   console.log(`Generated: ${red} ${green} ${blue} ${text} ${textFont}`);
 
